@@ -10,4 +10,6 @@ public interface TutorRepository extends JpaRepository<Tutor, Long> {
     Optional<Tutor> findById(Long id);
     List<Tutor> findByNameContaining(String name);
 
+    boolean existsByName(String name);
+
 }

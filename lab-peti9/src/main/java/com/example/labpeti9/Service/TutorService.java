@@ -20,6 +20,11 @@ public class TutorService {
     private TutorRepository tutorRepository;
 
     public TutorDTO registerTutor(TutorDTO tutorDTO) {
+
+        // Check if a tutor with the same name already exists
+        if (tutorRepository.existsByName(tutorDTO.getName())) {
+            throw new IllegalArgumentException("A tutor with the same name already exists");
+        }
         Tutor tutor = mapTutorDTOToEntity(tutorDTO);
         Tutor savedTutor = tutorRepository.save(tutor);
         return mapTutorEntityToDTO(savedTutor);
