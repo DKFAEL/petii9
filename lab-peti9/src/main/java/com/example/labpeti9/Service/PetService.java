@@ -3,15 +3,17 @@ package com.example.labpeti9.Service;
 import com.example.labpeti9.Domain.Pet;
 import com.example.labpeti9.Domain.Tutor;
 import com.example.labpeti9.Dto.PetDTO;
-import com.example.labpeti9.Dto.TutorDTO;
 import com.example.labpeti9.Repository.PetRepository;
 import com.example.labpeti9.Repository.TutorRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PetService {
@@ -22,34 +24,29 @@ public class PetService {
     @Autowired
     private TutorRepository tutorRepository;
 
-    public Pet registerPet(Long tutorId, PetDTO petDTO) {
-        Tutor tutor = tutorRepository.findById(tutorId)
-                .orElseThrow(() -> new IllegalArgumentException("Tutor not found"));
+    public PetDTO registerPet(Long tutorId, PetDTO petDTO) {
+        Optional<Tutor> tutorOptional = tutorRepository.findById(tutorId);
 
-        Pet pet = new Pet();
-        BeanUtils.copyProperties(petDTO, pet);
+        if (tutorOptional.isPresent()) {
+            Tutor tutor = tutorOptional.get();
+            Pet pet = mapPetDTOToEntity(petDTO);
+            pet.setTutor(tutor);
 
-        // Configure the relationship with the tutor
-        pet.setTutor(tutor);
-
-        // Business rules
-        if (tutor.getPets() != null) {
-            // Check if a pet with the same name already exists for the tutor
-            if (tutor.getPets().stream().anyMatch(existingPet -> existingPet.getName().equals(pet.getName()))) {
-                throw new IllegalArgumentException("A pet with the same name already exists for this tutor.");
-            }
+            Pet savedPet = petRepository.save(pet);
+            return mapPetEntityToDTO(savedPet);
         }
 
-        return petRepository.save(pet);
+        return null;
     }
 
-    public Pet getPet(Long petId) {
-        Optional<Pet> optionalPet = petRepository.findById(petId);
-        return optionalPet.orElse(null);
+    public PetDTO getPetById(Long petId) {
+        Optional<Pet> petOptional = petRepository.findById(petId);
+        return petOptional.map(this::mapPetEntityToDTO).orElse(null);
     }
 
-    public List<Pet> getPetsByName(String name) {
-        return petRepository.findByNameContaining(name);
+    public List<PetDTO> getPetsByName(String name) {
+        List<Pet> pets = petRepository.findByNameContaining(name);
+        return pets.stream().map(this::mapPetEntityToDTO).collect(Collectors.toList());
     }
 
     public void updatePetName(Long petId, String newName) {
@@ -60,16 +57,31 @@ public class PetService {
     }
 
     public void deletePet(Long petId) {
-        // Before deleting the pet, we should disassociate it from the tutor
         Optional<Pet> optionalPet = petRepository.findById(petId);
         if (optionalPet.isPresent()) {
             Pet pet = optionalPet.get();
             Tutor tutor = pet.getTutor();
-            if (tutor != null) {
+
+            if (tutor != null && tutor.getPets() != null) {
                 tutor.getPets().remove(pet);
                 tutorRepository.save(tutor);
             }
+
+            petRepository.deleteById(petId);
         }
-        petRepository.deleteById(petId);
+    }
+
+    // Outros métodos relacionados a Pet
+
+    private Pet mapPetDTOToEntity(PetDTO petDTO) {
+        Pet pet = new Pet();
+        BeanUtils.copyProperties(petDTO, pet);
+        return pet;
+    }
+
+    private PetDTO mapPetEntityToDTO(Pet pet) {
+        PetDTO petDTO = new PetDTO();
+        BeanUtils.copyProperties(pet, petDTO);
+        return petDTO;
     }
 }

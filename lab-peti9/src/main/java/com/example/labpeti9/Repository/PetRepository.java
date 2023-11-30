@@ -1,6 +1,7 @@
 package com.example.labpeti9.Repository;
 
 import com.example.labpeti9.Domain.Pet;
+import com.example.labpeti9.Domain.Tutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,4 +11,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     Optional<Pet> findById(Long id);
 
     List<Pet> findByNameContaining(String name);
+
+
 }

@@ -17,4 +17,8 @@ public class TutorDTO {
     private String nickname;
     private LocalDate dateOfBirth;
     private List<PetDTO> pets;
+
+
+
+
 }

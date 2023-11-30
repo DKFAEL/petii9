@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TutorRepository extends JpaRepository<Tutor, Long> {
-    Optional<Tutor> findByName(String name);
+    Optional<Tutor> findById(Long id);
     List<Tutor> findByNameContaining(String name);
-    void deletePetById(Long petId);
+
 }

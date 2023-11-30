@@ -1,7 +1,7 @@
 package com.example.labpeti9.Service;
 
-import com.example.labpeti9.Domain.Tutor;
 import com.example.labpeti9.Domain.Pet;
+import com.example.labpeti9.Domain.Tutor;
 import com.example.labpeti9.Dto.PetDTO;
 import com.example.labpeti9.Dto.TutorDTO;
 import com.example.labpeti9.Repository.TutorRepository;
@@ -19,39 +19,58 @@ public class TutorService {
     @Autowired
     private TutorRepository tutorRepository;
 
-    public Tutor registerTutor(TutorDTO tutorDTO) {
+    public TutorDTO registerTutor(TutorDTO tutorDTO) {
+        Tutor tutor = mapTutorDTOToEntity(tutorDTO);
+        Tutor savedTutor = tutorRepository.save(tutor);
+        return mapTutorEntityToDTO(savedTutor);
+    }
+
+    public List<TutorDTO> getAllTutors() {
+        List<Tutor> tutors = tutorRepository.findAll();
+        return tutors.stream().map(this::mapTutorEntityToDTO).collect(Collectors.toList());
+    }
+
+    public TutorDTO getTutorById(Long tutorId) {
+        Optional<Tutor> tutorOptional = tutorRepository.findById(tutorId);
+        return tutorOptional.map(this::mapTutorEntityToDTO).orElse(null);
+    }
+
+    public List<TutorDTO> getTutorsByName(String name) {
+        List<Tutor> tutors = tutorRepository.findByNameContaining(name);
+        return tutors.stream().map(this::mapTutorEntityToDTO).collect(Collectors.toList());
+    }
+
+    private Tutor mapTutorDTOToEntity(TutorDTO tutorDTO) {
         Tutor tutor = new Tutor();
         BeanUtils.copyProperties(tutorDTO, tutor);
-
-        // Configure the relationship between pets and the tutor
-        List<PetDTO> petDTOs = tutorDTO.getPets();
-        if (petDTOs != null) {
-            List<Pet> pets = petDTOs.stream()
-                    .map(petDTO -> {
-                        Pet pet = new Pet();
-                        BeanUtils.copyProperties(petDTO, pet);
-                        pet.setTutor(tutor);
-                        return pet;
-                    })
-                    .collect(Collectors.toList());
-            tutor.setPets(pets);
-        }
-
-        // Business rules
-        if (tutorRepository.findByName(tutor.getName()).isPresent()) {
-            throw new IllegalArgumentException("A tutor with the same name already exists.");
-        }
-
-        return tutorRepository.save(tutor);
+        List<Pet> pets = tutorDTO.getPets().stream().map(this::mapPetDTOToEntity).collect(Collectors.toList());
+        pets.forEach(pet -> pet.setTutor(tutor));
+        tutor.setPets(pets);
+        return tutor;
     }
 
-    public Optional<Tutor> getTutor(Long code) {
-        return tutorRepository.findById(code);
+
+    private TutorDTO mapTutorEntityToDTO(Tutor tutor) {
+        TutorDTO tutorDTO = new TutorDTO();
+        BeanUtils.copyProperties(tutor, tutorDTO);
+
+
+        List<PetDTO> petDTOs = tutor.getPets().stream().map(this::mapPetEntityToDTO).collect(Collectors.toList());
+
+        tutorDTO.setPets(petDTOs);
+        return tutorDTO;
     }
 
-    public List<Tutor> getTutorsByName(String name) {
-        return tutorRepository.findByNameContaining(name);
+
+    private Pet mapPetDTOToEntity(PetDTO petDTO) {
+        Pet pet = new Pet();
+        BeanUtils.copyProperties(petDTO, pet);
+        return pet;
     }
 
-    // Other methods as needed
+    private PetDTO mapPetEntityToDTO(Pet pet) {
+        PetDTO petDTO = new PetDTO();
+        BeanUtils.copyProperties(pet, petDTO);
+        return petDTO;
+    }
 }

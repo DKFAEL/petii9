@@ -12,22 +12,24 @@ import java.util.List;
 
 @Entity(name = "Tutor")
 @Table(name = "Tutor")
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Tutor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+
     private String name;
+
     private String nickname;
     private LocalDate dateOfBirth;
 
-    @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL,  fetch = FetchType.EAGER)
     private List<Pet> pets;
-
 
 }
 
