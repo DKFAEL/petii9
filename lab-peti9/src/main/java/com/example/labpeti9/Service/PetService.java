@@ -29,6 +29,11 @@ public class PetService {
 
         if (tutorOptional.isPresent()) {
             Tutor tutor = tutorOptional.get();
+
+            // Check if the tutor already has a pet with the same name
+            if (tutor.getPets().stream().anyMatch(p -> p.getName().equalsIgnoreCase(petDTO.getName()))) {
+                throw new IllegalArgumentException("Tutor already has a pet with the same name");
+            }
             Pet pet = mapPetDTOToEntity(petDTO);
             pet.setTutor(tutor);
 
