@@ -41,6 +41,8 @@ O projeto foi estruturado com o framework Spring Boot, que proporciona uma arqui
 - **Excluir Pet:**
   - Se um pet precisa sair de cena, envie um pedido DELETE para `/api/pets/{petId}` e dê adeus.
 
+## Nível de dificuldade: Baixa
+
 ## Teste com Estilo 🧪
 
 Use o [Postman](https://www.postman.com/) para explorar o **LabPeti9**. O arquivo [Postman collection](https://api.postman.com/collections/24163924-c978b29a-b66a-43a0-b73a-1c11e9c3e42a?access_key=PMAT-01HGGP55CJ93TR7YF7JM89D6FY) contém pedidos de exemplo para vários pontos de extremidade. Personalize os payloads e parâmetros conforme necessário.
